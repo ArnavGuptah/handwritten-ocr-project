@@ -1,6 +1,9 @@
 .venv/
 __pycache__/
 *.pyc
+google-key.json
+app/google-key.json
+.env
 uploads/
 outputs/
-.env
+

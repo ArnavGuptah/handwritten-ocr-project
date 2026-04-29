@@ -1,373 +1,213 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Handwritten OCR</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Handwritten OCR Pro</title>
 
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f0f4f8;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 40px 20px;
-    }
+<style>
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:#0f172a;
+    color:white;
+}
 
-    h1 {
-      font-size: 2rem;
-      color: #1a202c;
-      margin-bottom: 8px;
-    }
+.container{
+    max-width:1200px;
+    margin:auto;
+    padding:30px;
+}
 
-    .subtitle {
-      color: #718096;
-      margin-bottom: 40px;
-      font-size: 1rem;
-    }
+h1{
+    text-align:center;
+    margin-bottom:30px;
+}
 
-    .card {
-      background: white;
-      border-radius: 16px;
-      padding: 32px;
-      width: 100%;
-      max-width: 700px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      margin-bottom: 24px;
-    }
+.card{
+    background:#1e293b;
+    padding:20px;
+    border-radius:14px;
+    margin-bottom:20px;
+}
 
-    .drop-zone {
-      border: 2px dashed #cbd5e0;
-      border-radius: 12px;
-      padding: 48px 24px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s;
-      background: #f7fafc;
-    }
+input,button{
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    margin:8px 0;
+}
 
-    .drop-zone:hover, .drop-zone.dragover {
-      border-color: #4299e1;
-      background: #ebf8ff;
-    }
+button{
+    background:#38bdf8;
+    color:black;
+    font-weight:bold;
+    cursor:pointer;
+}
 
-    .drop-zone .icon { font-size: 3rem; margin-bottom: 12px; }
-    .drop-zone p { color: #718096; font-size: 0.95rem; }
-    .drop-zone strong { color: #2d3748; }
+button:hover{
+    opacity:0.9;
+}
 
-    #fileInput { display: none; }
+.grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
 
-    .preview-wrap {
-      margin-top: 20px;
-      display: none;
-      text-align: center;
-    }
+textarea{
+    width:100%;
+    height:250px;
+    border-radius:10px;
+    padding:15px;
+    resize:none;
+    font-size:15px;
+}
 
-    .preview-wrap img {
-      max-width: 100%;
-      max-height: 300px;
-      border-radius: 8px;
-      border: 1px solid #e2e8f0;
-    }
+.stat{
+    margin:8px 0;
+}
 
-    .btn {
-      display: block;
-      width: 100%;
-      padding: 14px;
-      margin-top: 20px;
-      background: #4299e1;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .btn:hover { background: #3182ce; }
-    .btn:disabled { background: #a0aec0; cursor: not-allowed; }
-
-    .status {
-      text-align: center;
-      padding: 12px;
-      border-radius: 8px;
-      margin-top: 16px;
-      font-size: 0.9rem;
-      display: none;
-    }
-
-    .status.loading { background: #ebf8ff; color: #2b6cb0; display: block; }
-    .status.error   { background: #fff5f5; color: #c53030; display: block; }
-
-    .result-section { display: none; }
-
-    .result-section h2 {
-      font-size: 1.1rem;
-      color: #2d3748;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .confidence-badge {
-      font-size: 0.75rem;
-      padding: 2px 10px;
-      border-radius: 999px;
-      font-weight: 600;
-    }
-
-    .high   { background: #c6f6d5; color: #276749; }
-    .medium { background: #fefcbf; color: #744210; }
-    .low    { background: #fed7d7; color: #742a2a; }
-
-    textarea {
-      width: 100%;
-      min-height: 140px;
-      padding: 14px;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      color: #2d3748;
-      resize: vertical;
-      font-family: inherit;
-      line-height: 1.6;
-    }
-
-    textarea:focus { outline: none; border-color: #4299e1; }
-
-    .tags-wrap {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 4px;
-    }
-
-    .tag {
-      padding: 4px 12px;
-      border-radius: 999px;
-      font-size: 0.8rem;
-      font-weight: 500;
-    }
-
-    .tag-keyword  { background: #e9d8fd; color: #553c9a; }
-    .tag-entity   { background: #bee3f8; color: #2a4365; }
-
-    .entity-type {
-      font-size: 0.7rem;
-      opacity: 0.7;
-      margin-left: 4px;
-    }
-
-    .export-row {
-      display: flex;
-      gap: 12px;
-      margin-top: 20px;
-    }
-
-    .btn-outline {
-      flex: 1;
-      padding: 10px;
-      border: 1.5px solid #4299e1;
-      color: #4299e1;
-      background: white;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-outline:hover { background: #ebf8ff; }
-
-    .meta-row {
-      display: flex;
-      gap: 16px;
-      font-size: 0.82rem;
-      color: #718096;
-      margin-top: 8px;
-    }
-
-    .meta-row span strong { color: #2d3748; }
-  </style>
+.history-item{
+    background:#334155;
+    padding:10px;
+    border-radius:8px;
+    margin-bottom:10px;
+    font-size:14px;
+}
+</style>
 </head>
+
 <body>
 
-  <h1>📝 Handwritten OCR</h1>
-  <p class="subtitle">Upload a photo of handwritten notes — get clean digital text instantly</p>
+<div class="container">
 
-  <!-- Upload card -->
-  <div class="card">
-    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
-      <div class="icon">🖼️</div>
-      <p><strong>Click to upload</strong> or drag and drop</p>
-      <p style="margin-top:6px">JPG, PNG, BMP, TIFF supported</p>
-    </div>
-    <input type="file" id="fileInput" accept="image/*" />
+<h1>📝 Handwritten OCR Pro</h1>
 
-    <div class="preview-wrap" id="previewWrap">
-      <img id="preview" src="" alt="Preview" />
-    </div>
+<div class="card">
+<input type="file" id="fileInput">
+<button onclick="uploadFile()">Transcribe Notes</button>
+</div>
 
-    <button class="btn" id="transcribeBtn" disabled onclick="transcribe()">
-      Transcribe Notes
-    </button>
+<div class="card">
+<div class="stat">⚡ Speed: <span id="speed">0</span> sec</div>
+<div class="stat">🎯 Confidence: <span id="confidence">0</span>%</div>
+<div class="stat">📄 Words: <span id="words">0</span></div>
+</div>
 
-    <div class="status" id="status"></div>
-  </div>
+<div class="grid">
 
-  <!-- Results card -->
-  <div class="card result-section" id="results">
+<div class="card">
+<h3>📄 Raw OCR Text</h3>
+<textarea id="rawText"></textarea>
+</div>
 
-    <h2>
-      📄 Transcribed Text
-      <span class="confidence-badge" id="confidenceBadge"></span>
-    </h2>
+<div class="card">
+<h3>✨ Cleaned Text</h3>
+<textarea id="cleanText"></textarea>
+</div>
 
-    <textarea id="outputText" spellcheck="true"></textarea>
+</div>
 
-    <div class="meta-row" id="metaRow"></div>
+<div class="card">
+<h3>🏷️ Keywords</h3>
+<div id="keywords"></div>
+</div>
 
-    <h2 style="margin-top:24px">🏷️ Keywords</h2>
-    <div class="tags-wrap" id="keywords"></div>
+<div class="card">
+<h3>🔍 Entities</h3>
+<div id="entities"></div>
+</div>
 
-    <h2 style="margin-top:24px">🔍 Entities Found</h2>
-    <div class="tags-wrap" id="entities"></div>
+<div class="card">
+<button onclick="downloadTXT()">Download TXT</button>
+<button onclick="window.print()">Download PDF</button>
+</div>
 
-    <div class="export-row">
-      <button class="btn-outline" onclick="exportTXT()">⬇ Export TXT</button>
-      <button class="btn-outline" onclick="copyText()">📋 Copy Text</button>
-      <button class="btn-outline" onclick="reset()">🔄 New Image</button>
-    </div>
+<div class="card">
+<h3>🕘 History</h3>
+<div id="history"></div>
+</div>
 
-  </div>
+</div>
 
 <script>
-  const API = 'http://localhost:8000/api/transcribe';
-  let selectedFile = null;
+const API = "http://127.0.0.1:8000/api/transcribe";
 
-  // Drag and drop
-  const dropZone = document.getElementById('dropZone');
-  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
-  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-  dropZone.addEventListener('drop', e => {
-    e.preventDefault();
-    dropZone.classList.remove('dragover');
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) setFile(file);
-  });
+function saveHistory(text){
+    let items = JSON.parse(localStorage.getItem("ocrHistory") || "[]");
+    items.unshift(text);
+    items = items.slice(0,5);
+    localStorage.setItem("ocrHistory", JSON.stringify(items));
+    renderHistory();
+}
 
-  document.getElementById('fileInput').addEventListener('change', e => {
-    if (e.target.files[0]) setFile(e.target.files[0]);
-  });
+function renderHistory(){
+    let items = JSON.parse(localStorage.getItem("ocrHistory") || "[]");
+    let html = "";
+    items.forEach(x=>{
+        html += `<div class="history-item">${x.substring(0,120)}</div>`;
+    });
+    document.getElementById("history").innerHTML = html;
+}
 
-  function setFile(file) {
-    selectedFile = file;
-    const reader = new FileReader();
-    reader.onload = e => {
-      document.getElementById('preview').src = e.target.result;
-      document.getElementById('previewWrap').style.display = 'block';
-    };
-    reader.readAsDataURL(file);
-    document.getElementById('transcribeBtn').disabled = false;
-    document.getElementById('status').className = 'status';
-    document.getElementById('results').style.display = 'none';
-  }
-
-  async function transcribe() {
-    if (!selectedFile) return;
-
-    const btn = document.getElementById('transcribeBtn');
-    const status = document.getElementById('status');
-
-    btn.disabled = true;
-    btn.textContent = 'Processing...';
-    status.className = 'status loading';
-    status.textContent = '⏳ Preprocessing image and running OCR...';
-
-    try {
-      const form = new FormData();
-      form.append('file', selectedFile);
-
-      const res = await fetch(API, { method: 'POST', body: form });
-      const data = await res.json();
-
-      if (!res.ok) throw new Error(data.detail || 'Something went wrong');
-
-      showResults(data);
-      status.className = 'status';
-
-    } catch (err) {
-      status.className = 'status error';
-      status.textContent = '❌ Error: ' + err.message;
-      btn.disabled = false;
-      btn.textContent = 'Transcribe Notes';
+async function uploadFile(){
+    const file = document.getElementById("fileInput").files[0];
+    if(!file){
+        alert("Choose image first");
+        return;
     }
-  }
 
-  function showResults(data) {
-    const { ocr, nlp } = data;
+    const formData = new FormData();
+    formData.append("file", file);
 
-    // Text output
-    document.getElementById('outputText').value = nlp.corrected_text;
+    const start = performance.now();
 
-    // Confidence badge
-    const conf = ocr.average_confidence;
-    const badge = document.getElementById('confidenceBadge');
-    badge.textContent = conf + '% confidence';
-    badge.className = 'confidence-badge ' + (conf >= 80 ? 'high' : conf >= 50 ? 'medium' : 'low');
+    const res = await fetch(API,{
+        method:"POST",
+        body:formData
+    });
 
-    // Meta info
-    document.getElementById('metaRow').innerHTML =
-      `<span><strong>${ocr.word_count}</strong> words detected</span>
-       <span>Skew corrected: <strong>${ocr.skew_corrected}°</strong></span>`;
+    const data = await res.json();
 
-    // Keywords
-    const kw = document.getElementById('keywords');
-    kw.innerHTML = nlp.keywords.map(k =>
-      `<span class="tag tag-keyword">${k}</span>`).join('');
+    const end = performance.now();
 
-    // Entities
-    const ent = document.getElementById('entities');
-    ent.innerHTML = nlp.entities.length
-      ? nlp.entities.map(e =>
-          `<span class="tag tag-entity">${e.text}<span class="entity-type">${e.type}</span></span>`
-        ).join('')
-      : '<span style="color:#a0aec0;font-size:0.9rem">No entities detected</span>';
+    document.getElementById("confidence").innerText =
+    data.ocr.average_confidence ?? 0;
 
-    document.getElementById('results').style.display = 'block';
-    document.getElementById('transcribeBtn').textContent = 'Transcribe Notes';
-    document.getElementById('transcribeBtn').disabled = false;
-    document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
-  }
+    document.getElementById("words").innerText =
+    data.ocr.word_count ?? 0;
 
-  function exportTXT() {
-    const text = document.getElementById('outputText').value;
-    const blob = new Blob([text], { type: 'text/plain' });
-    const a = document.createElement('a');
+    document.getElementById("rawText").value =
+    data.ocr.raw_text ?? "";
+
+    document.getElementById("cleanText").value =
+    data.nlp.corrected_text ?? "";
+
+    document.getElementById("keywords").innerText =
+    data.nlp.keywords ? data.nlp.keywords.join(", ") : "None";
+
+    document.getElementById("entities").innerText =
+    data.nlp.entities && data.nlp.entities.length > 0
+        ? JSON.stringify(data.nlp.entities, null, 2)
+        : "None";
+
+saveHistory(data.nlp.corrected_text ?? "");
+}
+
+function downloadTXT(){
+    const text = document.getElementById("cleanText").value;
+    const blob = new Blob([text], {type:"text/plain"});
+    const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = 'transcribed_notes.txt';
+    a.download = "ocr_output.txt";
     a.click();
-  }
+}
 
-  function copyText() {
-    const text = document.getElementById('outputText').value;
-    navigator.clipboard.writeText(text).then(() => alert('Copied to clipboard!'));
-  }
-
-  function reset() {
-    selectedFile = null;
-    document.getElementById('fileInput').value = '';
-    document.getElementById('previewWrap').style.display = 'none';
-    document.getElementById('results').style.display = 'none';
-    document.getElementById('transcribeBtn').disabled = true;
-    document.getElementById('transcribeBtn').textContent = 'Transcribe Notes';
-    document.getElementById('status').className = 'status';
-  }
+renderHistory();
 </script>
+
 </body>
 </html>
+```

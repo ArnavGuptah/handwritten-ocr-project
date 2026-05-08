@@ -1,14 +1,8 @@
 import cv2
 import numpy as np
 import easyocr
-import os
-from openai import OpenAI
-
 
 reader = easyocr.Reader(['en'], gpu=False)
-
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
 
 def gpt_cleanup(text):
     import re

@@ -121,6 +121,11 @@ textarea{
 </div>
 
 <div class="card">
+<h3>📌 AI Summary</h3>
+<div id="summary"></div>
+</div>
+
+<div class="card">
 <button onclick="downloadTXT()">Download TXT</button>
 <button onclick="window.print()">Download PDF</button>
 </div>
@@ -193,6 +198,11 @@ async function uploadFile(){
         ? JSON.stringify(data.nlp.entities, null, 2)
         : "None";
 
+    document.getElementById("summary").innerHTML =
+    data.nlp.summary && data.nlp.summary.length > 0
+        ? data.nlp.summary.map(x => `<p>• ${x}</p>`).join("")
+        : "No summary generated";
+
 saveHistory(data.nlp.corrected_text ?? "");
 }
 
@@ -210,4 +220,4 @@ renderHistory();
 
 </body>
 </html>
-```
+
